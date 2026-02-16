@@ -79,7 +79,7 @@ export async function startHttpServer(): Promise<void> {
     res.json({
       status: 'ok',
       server: 'tvplus-mcp-chatwoot',
-      version: '0.1.0',
+      version: '0.2.0',
       activeSessions: sessions.size,
     });
   });

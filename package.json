@@ -1,6 +1,6 @@
 {
   "name": "tvplus-mcp-chatwoot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP Server for Chatwoot - Manage conversations, contacts, messages, and more via Model Context Protocol",
   "author": "Renato Ascencio",
   "license": "MIT",
