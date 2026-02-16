@@ -1,0 +1,54 @@
+{
+  "name": "tvplus-mcp-chatwoot",
+  "version": "0.1.0",
+  "description": "MCP Server for Chatwoot - Manage conversations, contacts, messages, and more via Model Context Protocol",
+  "author": "Renato Ascencio",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "tvplus-mcp-chatwoot": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:http": "MCP_MODE=http node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "dev:http": "MCP_MODE=http tsx src/index.ts",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.15.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "chatwoot",
+    "model-context-protocol",
+    "ai",
+    "customer-support"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RenatoAscencio/tvplus-mcp-chatwoot.git"
+  }
+}
