@@ -5,6 +5,7 @@ MCP (Model Context Protocol) server for [Chatwoot](https://www.chatwoot.com/) �
 ## Features
 
 - **28 tools** covering Chatwoot's Application API
+- **Multi-account**: All tools accept an optional `account_id` to target any account
 - **Dual transport**: STDIO (Claude Desktop, Claude Code) and HTTP/SSE (remote access)
 - **Docker ready**: Multi-stage build with health checks
 - **Session management**: Multi-session HTTP with automatic cleanup
@@ -157,7 +158,7 @@ docker run -p 3000:3000 \
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `CHATWOOT_BASE_URL` | Yes | — | Chatwoot instance URL |
-| `CHATWOOT_ACCOUNT_ID` | Yes | — | Chatwoot account ID |
+| `CHATWOOT_ACCOUNT_ID` | Yes | — | Default Chatwoot account ID (can be overridden per tool call) |
 | `CHATWOOT_API_TOKEN` | Yes | — | API access token |
 | `MCP_MODE` | No | `stdio` | Transport mode: `stdio` or `http` |
 | `PORT` | No | `3000` | HTTP server port |
@@ -197,6 +198,20 @@ npm run lint
 # Build
 npm run build
 ```
+
+## Multi-Account Support
+
+All tools accept an optional `account_id` parameter. When omitted, uses the default `CHATWOOT_ACCOUNT_ID` from the environment.
+
+```json
+// Uses default account (from env var)
+{ "name": "list_conversations", "arguments": { "status": "open" } }
+
+// Targets a specific account
+{ "name": "list_conversations", "arguments": { "status": "open", "account_id": 7 } }
+```
+
+This lets a single MCP server manage multiple Chatwoot accounts without needing separate deployments.
 
 ## Roadmap
 
