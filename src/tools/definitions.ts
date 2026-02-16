@@ -1,5 +1,13 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 
+const accountIdProperty = {
+  account_id: {
+    type: 'number',
+    description:
+      'Chatwoot account ID to use. If omitted, uses the default account from CHATWOOT_ACCOUNT_ID env var.',
+  },
+};
+
 export const tools: Tool[] = [
   // ─── Health ──────────────────────────────────────────────
   {
@@ -8,7 +16,7 @@ export const tools: Tool[] = [
       'Test connection to the Chatwoot instance and return account information. Use this to verify the MCP server is properly configured.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
 
@@ -26,6 +34,7 @@ export const tools: Tool[] = [
           description: 'Sort field',
           enum: ['name', 'email', 'phone_number', 'last_activity_at', 'created_at'],
         },
+        ...accountIdProperty,
       },
     },
   },
@@ -36,6 +45,7 @@ export const tools: Tool[] = [
       type: 'object' as const,
       properties: {
         contact_id: { type: 'number', description: 'The contact ID' },
+        ...accountIdProperty,
       },
       required: ['contact_id'],
     },
@@ -59,6 +69,7 @@ export const tools: Tool[] = [
           type: 'object',
           description: 'Custom attributes as key-value pairs',
         },
+        ...accountIdProperty,
       },
     },
   },
@@ -73,6 +84,7 @@ export const tools: Tool[] = [
         email: { type: 'string', description: 'New email' },
         phone_number: { type: 'string', description: 'New phone number' },
         custom_attributes: { type: 'object', description: 'Custom attributes to set' },
+        ...accountIdProperty,
       },
       required: ['contact_id'],
     },
@@ -86,6 +98,7 @@ export const tools: Tool[] = [
       properties: {
         query: { type: 'string', description: 'Search query (name, email, phone, or identifier)' },
         page: { type: 'number', description: 'Page number (default: 1)' },
+        ...accountIdProperty,
       },
       required: ['query'],
     },
@@ -97,6 +110,7 @@ export const tools: Tool[] = [
       type: 'object' as const,
       properties: {
         contact_id: { type: 'number', description: 'The contact ID' },
+        ...accountIdProperty,
       },
       required: ['contact_id'],
     },
@@ -128,6 +142,7 @@ export const tools: Tool[] = [
           description: 'Filter by label names',
         },
         page: { type: 'number', description: 'Page number (default: 1)' },
+        ...accountIdProperty,
       },
     },
   },
@@ -139,6 +154,7 @@ export const tools: Tool[] = [
       type: 'object' as const,
       properties: {
         conversation_id: { type: 'number', description: 'The conversation ID' },
+        ...accountIdProperty,
       },
       required: ['conversation_id'],
     },
@@ -160,6 +176,7 @@ export const tools: Tool[] = [
         },
         assignee_id: { type: 'number', description: 'Agent ID to assign' },
         team_id: { type: 'number', description: 'Team ID to assign' },
+        ...accountIdProperty,
       },
       required: ['inbox_id'],
     },
@@ -176,6 +193,7 @@ export const tools: Tool[] = [
           description: 'New status',
           enum: ['open', 'resolved', 'pending', 'snoozed'],
         },
+        ...accountIdProperty,
       },
       required: ['conversation_id', 'status'],
     },
@@ -190,6 +208,7 @@ export const tools: Tool[] = [
         conversation_id: { type: 'number', description: 'The conversation ID' },
         assignee_id: { type: 'number', description: 'Agent ID to assign (omit to unassign agent)' },
         team_id: { type: 'number', description: 'Team ID to assign (omit to unassign team)' },
+        ...accountIdProperty,
       },
       required: ['conversation_id'],
     },
@@ -206,6 +225,7 @@ export const tools: Tool[] = [
           items: { type: 'string' },
           description: 'Label names to add',
         },
+        ...accountIdProperty,
       },
       required: ['conversation_id', 'labels'],
     },
@@ -222,6 +242,7 @@ export const tools: Tool[] = [
           description: 'Priority level',
           enum: ['urgent', 'high', 'medium', 'low', 'none'],
         },
+        ...accountIdProperty,
       },
       required: ['conversation_id', 'priority'],
     },
@@ -246,6 +267,7 @@ export const tools: Tool[] = [
           description: 'Message type',
           enum: ['outgoing', 'incoming'],
         },
+        ...accountIdProperty,
       },
       required: ['conversation_id', 'content'],
     },
@@ -257,6 +279,7 @@ export const tools: Tool[] = [
       type: 'object' as const,
       properties: {
         conversation_id: { type: 'number', description: 'The conversation ID' },
+        ...accountIdProperty,
       },
       required: ['conversation_id'],
     },
@@ -269,7 +292,7 @@ export const tools: Tool[] = [
       'List all agents in the Chatwoot account with their roles and availability status.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
 
@@ -279,7 +302,7 @@ export const tools: Tool[] = [
     description: 'List all teams in the Chatwoot account.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
   {
@@ -289,6 +312,7 @@ export const tools: Tool[] = [
       type: 'object' as const,
       properties: {
         team_id: { type: 'number', description: 'The team ID' },
+        ...accountIdProperty,
       },
       required: ['team_id'],
     },
@@ -301,7 +325,7 @@ export const tools: Tool[] = [
       'List all inboxes (channels) in the Chatwoot account. Shows channel type, name, and configuration.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
 
@@ -311,7 +335,7 @@ export const tools: Tool[] = [
     description: 'List all labels available in the Chatwoot account.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
   {
@@ -327,6 +351,7 @@ export const tools: Tool[] = [
           type: 'boolean',
           description: 'Show label on sidebar (default: true)',
         },
+        ...accountIdProperty,
       },
       required: ['title'],
     },
@@ -339,7 +364,7 @@ export const tools: Tool[] = [
       'List all canned (pre-written) responses. These are quick reply templates for agents.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
   {
@@ -353,6 +378,7 @@ export const tools: Tool[] = [
           description: 'Short code to trigger this response (e.g., "greeting")',
         },
         content: { type: 'string', description: 'The response content text' },
+        ...accountIdProperty,
       },
       required: ['short_code', 'content'],
     },
@@ -386,6 +412,7 @@ export const tools: Tool[] = [
         },
         since: { type: 'string', description: 'Start date (ISO 8601 format)' },
         until: { type: 'string', description: 'End date (ISO 8601 format)' },
+        ...accountIdProperty,
       },
       required: ['metric', 'type'],
     },
@@ -397,7 +424,7 @@ export const tools: Tool[] = [
     description: 'List all registered webhooks in the Chatwoot account.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: { ...accountIdProperty },
     },
   },
 
@@ -414,6 +441,7 @@ export const tools: Tool[] = [
           description: 'Filter by model type',
           enum: ['contact_attribute', 'conversation_attribute'],
         },
+        ...accountIdProperty,
       },
     },
   },

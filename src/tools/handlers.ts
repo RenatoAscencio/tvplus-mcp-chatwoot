@@ -26,6 +26,11 @@ function errorResult(error: unknown): CallToolResult {
   return textResult(`Error: ${message}`, true);
 }
 
+/** Extract account_id from args (optional override) */
+function acct(args: ToolArgs): number | undefined {
+  return args.account_id as number | undefined;
+}
+
 export async function handleToolCall(
   client: ChatwootClient,
   toolName: string,
@@ -49,9 +54,9 @@ async function dispatch(
   switch (toolName) {
     // ─── Health ──────────────────────────────────────────
     case 'chatwoot_health': {
-      const result = await client.health();
+      const result = await client.health(acct(args));
       return textResult(
-        `Connected to Chatwoot successfully.\nAccount: ${result.accountName || 'OK'}`,
+        `Connected to Chatwoot successfully.\nAccount ID: ${result.accountId}\nAccount: ${result.accountName || 'OK'}`,
       );
     }
 
@@ -60,12 +65,13 @@ async function dispatch(
       const data = await client.listContacts(
         args.page as number | undefined,
         args.sort as string | undefined,
+        acct(args),
       );
       return jsonResult(data);
     }
 
     case 'get_contact': {
-      const data = await client.getContact(args.contact_id as number);
+      const data = await client.getContact(args.contact_id as number, acct(args));
       return jsonResult(data);
     }
 
@@ -77,7 +83,7 @@ async function dispatch(
         identifier: args.identifier as string | undefined,
         inbox_id: args.inbox_id as number | undefined,
         custom_attributes: args.custom_attributes as Record<string, unknown> | undefined,
-      });
+      }, acct(args));
       return jsonResult(data);
     }
 
@@ -88,7 +94,7 @@ async function dispatch(
       if (args.email !== undefined) updates.email = args.email;
       if (args.phone_number !== undefined) updates.phone_number = args.phone_number;
       if (args.custom_attributes !== undefined) updates.custom_attributes = args.custom_attributes;
-      const data = await client.updateContact(contactId, updates);
+      const data = await client.updateContact(contactId, updates, acct(args));
       return jsonResult(data);
     }
 
@@ -96,12 +102,13 @@ async function dispatch(
       const data = await client.searchContacts(
         args.query as string,
         args.page as number | undefined,
+        acct(args),
       );
       return jsonResult(data);
     }
 
     case 'get_contact_conversations': {
-      const data = await client.getContactConversations(args.contact_id as number);
+      const data = await client.getContactConversations(args.contact_id as number, acct(args));
       return jsonResult(data);
     }
 
@@ -114,12 +121,12 @@ async function dispatch(
         team_id: args.team_id as number | undefined,
         labels: args.labels as string[] | undefined,
         page: args.page as number | undefined,
-      });
+      }, acct(args));
       return jsonResult(data);
     }
 
     case 'get_conversation': {
-      const data = await client.getConversation(args.conversation_id as number);
+      const data = await client.getConversation(args.conversation_id as number, acct(args));
       return jsonResult(data);
     }
 
@@ -131,7 +138,7 @@ async function dispatch(
         status: args.status as string | undefined,
         assignee_id: args.assignee_id as number | undefined,
         team_id: args.team_id as number | undefined,
-      });
+      }, acct(args));
       return jsonResult(data);
     }
 
@@ -139,6 +146,7 @@ async function dispatch(
       const data = await client.updateConversationStatus(
         args.conversation_id as number,
         args.status as 'open' | 'resolved' | 'pending' | 'snoozed',
+        acct(args),
       );
       return jsonResult(data);
     }
@@ -148,6 +156,7 @@ async function dispatch(
         args.conversation_id as number,
         args.assignee_id as number | undefined,
         args.team_id as number | undefined,
+        acct(args),
       );
       return jsonResult(data);
     }
@@ -156,6 +165,7 @@ async function dispatch(
       const data = await client.addLabelsToConversation(
         args.conversation_id as number,
         args.labels as string[],
+        acct(args),
       );
       return jsonResult(data);
     }
@@ -164,6 +174,7 @@ async function dispatch(
       const data = await client.toggleConversationPriority(
         args.conversation_id as number,
         args.priority as 'urgent' | 'high' | 'medium' | 'low' | 'none',
+        acct(args),
       );
       return jsonResult(data);
     }
@@ -177,41 +188,42 @@ async function dispatch(
           private: args.private as boolean | undefined,
           message_type: args.message_type as 'outgoing' | 'incoming' | undefined,
         },
+        acct(args),
       );
       return jsonResult(data);
     }
 
     case 'list_messages': {
-      const data = await client.listMessages(args.conversation_id as number);
+      const data = await client.listMessages(args.conversation_id as number, acct(args));
       return jsonResult(data);
     }
 
     // ─── Agents ──────────────────────────────────────────
     case 'list_agents': {
-      const data = await client.listAgents();
+      const data = await client.listAgents(acct(args));
       return jsonResult(data);
     }
 
     // ─── Teams ───────────────────────────────────────────
     case 'list_teams': {
-      const data = await client.listTeams();
+      const data = await client.listTeams(acct(args));
       return jsonResult(data);
     }
 
     case 'get_team_members': {
-      const data = await client.getTeamMembers(args.team_id as number);
+      const data = await client.getTeamMembers(args.team_id as number, acct(args));
       return jsonResult(data);
     }
 
     // ─── Inboxes ─────────────────────────────────────────
     case 'list_inboxes': {
-      const data = await client.listInboxes();
+      const data = await client.listInboxes(acct(args));
       return jsonResult(data);
     }
 
     // ─── Labels ──────────────────────────────────────────
     case 'list_labels': {
-      const data = await client.listLabels();
+      const data = await client.listLabels(acct(args));
       return jsonResult(data);
     }
 
@@ -221,13 +233,13 @@ async function dispatch(
         description: args.description as string | undefined,
         color: args.color as string | undefined,
         show_on_sidebar: args.show_on_sidebar as boolean | undefined,
-      });
+      }, acct(args));
       return jsonResult(data);
     }
 
     // ─── Canned Responses ────────────────────────────────
     case 'list_canned_responses': {
-      const data = await client.listCannedResponses();
+      const data = await client.listCannedResponses(acct(args));
       return jsonResult(data);
     }
 
@@ -235,7 +247,7 @@ async function dispatch(
       const data = await client.createCannedResponse({
         short_code: args.short_code as string,
         content: args.content as string,
-      });
+      }, acct(args));
       return jsonResult(data);
     }
 
@@ -246,19 +258,19 @@ async function dispatch(
         type: args.type as string,
         since: args.since as string | undefined,
         until: args.until as string | undefined,
-      });
+      }, acct(args));
       return jsonResult(data);
     }
 
     // ─── Webhooks ────────────────────────────────────────
     case 'list_webhooks': {
-      const data = await client.listWebhooks();
+      const data = await client.listWebhooks(acct(args));
       return jsonResult(data);
     }
 
     // ─── Custom Attributes ───────────────────────────────
     case 'list_custom_attributes': {
-      const data = await client.listCustomAttributes(args.model as string | undefined);
+      const data = await client.listCustomAttributes(args.model as string | undefined, acct(args));
       return jsonResult(data);
     }
 

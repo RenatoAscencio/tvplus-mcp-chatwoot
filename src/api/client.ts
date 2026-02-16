@@ -4,10 +4,14 @@ import { logger } from '../utils/logger.js';
 
 export class ChatwootClient {
   private http: AxiosInstance;
-  private accountId: number;
+  private baseUrl: string;
+  private defaultAccountId: number;
+  private apiToken: string;
 
   constructor(config: ChatwootConfig) {
-    this.accountId = config.accountId;
+    this.baseUrl = config.baseUrl;
+    this.defaultAccountId = config.accountId;
+    this.apiToken = config.apiToken;
 
     this.http = axios.create({
       baseURL: `${config.baseUrl}/api/v1/accounts/${config.accountId}`,
@@ -35,22 +39,46 @@ export class ChatwootClient {
     );
   }
 
+  /** Returns the axios instance scoped to a specific account (or default) */
+  private forAccount(accountId?: number): AxiosInstance {
+    if (!accountId || accountId === this.defaultAccountId) {
+      return this.http;
+    }
+    // Create a one-off instance for the alternate account
+    return axios.create({
+      baseURL: `${this.baseUrl}/api/v1/accounts/${accountId}`,
+      headers: {
+        'api_access_token': this.apiToken,
+        'Content-Type': 'application/json',
+      },
+      timeout: 30000,
+    });
+  }
+
+  get currentAccountId(): number {
+    return this.defaultAccountId;
+  }
+
   // ─── Health ──────────────────────────────────────────────
 
-  async health(): Promise<{ success: boolean; accountName?: string }> {
-    const res = await this.http.get('/');
-    return { success: true, accountName: res.data?.name };
+  async health(accountId?: number): Promise<{ success: boolean; accountName?: string; accountId: number }> {
+    const http = this.forAccount(accountId);
+    const id = accountId || this.defaultAccountId;
+    const res = await http.get('/');
+    return { success: true, accountName: res.data?.name, accountId: id };
   }
 
   // ─── Contacts ────────────────────────────────────────────
 
-  async listContacts(page = 1, sortBy = 'name'): Promise<unknown> {
-    const res = await this.http.get('/contacts', { params: { page, sort: sortBy } });
+  async listContacts(page = 1, sortBy = 'name', accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/contacts', { params: { page, sort: sortBy } });
     return res.data;
   }
 
-  async getContact(contactId: number): Promise<unknown> {
-    const res = await this.http.get(`/contacts/${contactId}`);
+  async getContact(contactId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/contacts/${contactId}`);
     return res.data;
   }
 
@@ -61,28 +89,33 @@ export class ChatwootClient {
     identifier?: string;
     inbox_id?: number;
     custom_attributes?: Record<string, unknown>;
-  }): Promise<unknown> {
-    const res = await this.http.post('/contacts', data);
+  }, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.post('/contacts', data);
     return res.data;
   }
 
-  async updateContact(contactId: number, data: Record<string, unknown>): Promise<unknown> {
-    const res = await this.http.put(`/contacts/${contactId}`, data);
+  async updateContact(contactId: number, data: Record<string, unknown>, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.put(`/contacts/${contactId}`, data);
     return res.data;
   }
 
-  async searchContacts(query: string, page = 1): Promise<unknown> {
-    const res = await this.http.get('/contacts/search', { params: { q: query, page } });
+  async searchContacts(query: string, page = 1, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/contacts/search', { params: { q: query, page } });
     return res.data;
   }
 
-  async filterContacts(filters: Array<Record<string, unknown>>, page = 1): Promise<unknown> {
-    const res = await this.http.post('/contacts/filter', { payload: filters, page });
+  async filterContacts(filters: Array<Record<string, unknown>>, page = 1, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.post('/contacts/filter', { payload: filters, page });
     return res.data;
   }
 
-  async getContactConversations(contactId: number): Promise<unknown> {
-    const res = await this.http.get(`/contacts/${contactId}/conversations`);
+  async getContactConversations(contactId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/contacts/${contactId}/conversations`);
     return res.data;
   }
 
@@ -95,13 +128,15 @@ export class ChatwootClient {
     team_id?: number;
     labels?: string[];
     page?: number;
-  } = {}): Promise<unknown> {
-    const res = await this.http.get('/conversations', { params });
+  } = {}, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/conversations', { params });
     return res.data;
   }
 
-  async getConversation(conversationId: number): Promise<unknown> {
-    const res = await this.http.get(`/conversations/${conversationId}`);
+  async getConversation(conversationId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/conversations/${conversationId}`);
     return res.data;
   }
 
@@ -114,16 +149,19 @@ export class ChatwootClient {
     assignee_id?: number;
     team_id?: number;
     custom_attributes?: Record<string, unknown>;
-  }): Promise<unknown> {
-    const res = await this.http.post('/conversations', data);
+  }, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.post('/conversations', data);
     return res.data;
   }
 
   async updateConversationStatus(
     conversationId: number,
     status: 'open' | 'resolved' | 'pending' | 'snoozed',
+    accountId?: number,
   ): Promise<unknown> {
-    const res = await this.http.post(`/conversations/${conversationId}/toggle_status`, {
+    const http = this.forAccount(accountId);
+    const res = await http.post(`/conversations/${conversationId}/toggle_status`, {
       status,
     });
     return res.data;
@@ -133,8 +171,10 @@ export class ChatwootClient {
     conversationId: number,
     assigneeId?: number,
     teamId?: number,
+    accountId?: number,
   ): Promise<unknown> {
-    const res = await this.http.post(`/conversations/${conversationId}/assignments`, {
+    const http = this.forAccount(accountId);
+    const res = await http.post(`/conversations/${conversationId}/assignments`, {
       assignee_id: assigneeId,
       team_id: teamId,
     });
@@ -144,32 +184,38 @@ export class ChatwootClient {
   async addLabelsToConversation(
     conversationId: number,
     labels: string[],
+    accountId?: number,
   ): Promise<unknown> {
-    const current = await this.getConversation(conversationId) as { labels?: string[] };
-    const merged = [...new Set([...(current.labels || []), ...labels])];
-    const res = await this.http.post(`/conversations/${conversationId}/labels`, {
+    const http = this.forAccount(accountId);
+    const current = await http.get(`/conversations/${conversationId}`) as { data?: { labels?: string[] } };
+    const merged = [...new Set([...(current.data?.labels || []), ...labels])];
+    const res = await http.post(`/conversations/${conversationId}/labels`, {
       labels: merged,
     });
     return res.data;
   }
 
-  async getConversationLabels(conversationId: number): Promise<unknown> {
-    const res = await this.http.get(`/conversations/${conversationId}/labels`);
+  async getConversationLabels(conversationId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/conversations/${conversationId}/labels`);
     return res.data;
   }
 
   async toggleConversationPriority(
     conversationId: number,
     priority: 'urgent' | 'high' | 'medium' | 'low' | 'none',
+    accountId?: number,
   ): Promise<unknown> {
-    const res = await this.http.patch(`/conversations/${conversationId}`, { priority });
+    const http = this.forAccount(accountId);
+    const res = await http.patch(`/conversations/${conversationId}`, { priority });
     return res.data;
   }
 
   // ─── Messages ────────────────────────────────────────────
 
-  async listMessages(conversationId: number): Promise<unknown> {
-    const res = await this.http.get(`/conversations/${conversationId}/messages`);
+  async listMessages(conversationId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/conversations/${conversationId}/messages`);
     return res.data;
   }
 
@@ -182,8 +228,10 @@ export class ChatwootClient {
       content_type?: string;
       content_attributes?: Record<string, unknown>;
     } = {},
+    accountId?: number,
   ): Promise<unknown> {
-    const res = await this.http.post(`/conversations/${conversationId}/messages`, {
+    const http = this.forAccount(accountId);
+    const res = await http.post(`/conversations/${conversationId}/messages`, {
       content,
       message_type: options.message_type || 'outgoing',
       private: options.private || false,
@@ -193,55 +241,64 @@ export class ChatwootClient {
     return res.data;
   }
 
-  async deleteMessage(conversationId: number, messageId: number): Promise<void> {
-    await this.http.delete(`/conversations/${conversationId}/messages/${messageId}`);
+  async deleteMessage(conversationId: number, messageId: number, accountId?: number): Promise<void> {
+    const http = this.forAccount(accountId);
+    await http.delete(`/conversations/${conversationId}/messages/${messageId}`);
   }
 
   // ─── Agents ──────────────────────────────────────────────
 
-  async listAgents(): Promise<unknown> {
-    const res = await this.http.get('/agents');
+  async listAgents(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/agents');
     return res.data;
   }
 
-  async getAgent(agentId: number): Promise<unknown> {
-    const res = await this.http.get(`/agents/${agentId}`);
+  async getAgent(agentId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/agents/${agentId}`);
     return res.data;
   }
 
   // ─── Teams ───────────────────────────────────────────────
 
-  async listTeams(): Promise<unknown> {
-    const res = await this.http.get('/teams');
+  async listTeams(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/teams');
     return res.data;
   }
 
-  async getTeam(teamId: number): Promise<unknown> {
-    const res = await this.http.get(`/teams/${teamId}`);
+  async getTeam(teamId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/teams/${teamId}`);
     return res.data;
   }
 
-  async getTeamMembers(teamId: number): Promise<unknown> {
-    const res = await this.http.get(`/teams/${teamId}/team_members`);
+  async getTeamMembers(teamId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/teams/${teamId}/team_members`);
     return res.data;
   }
 
   // ─── Inboxes ─────────────────────────────────────────────
 
-  async listInboxes(): Promise<unknown> {
-    const res = await this.http.get('/inboxes');
+  async listInboxes(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/inboxes');
     return res.data;
   }
 
-  async getInbox(inboxId: number): Promise<unknown> {
-    const res = await this.http.get(`/inboxes/${inboxId}`);
+  async getInbox(inboxId: number, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get(`/inboxes/${inboxId}`);
     return res.data;
   }
 
   // ─── Labels ──────────────────────────────────────────────
 
-  async listLabels(): Promise<unknown> {
-    const res = await this.http.get('/labels');
+  async listLabels(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/labels');
     return res.data;
   }
 
@@ -250,43 +307,49 @@ export class ChatwootClient {
     description?: string;
     color?: string;
     show_on_sidebar?: boolean;
-  }): Promise<unknown> {
-    const res = await this.http.post('/labels', data);
+  }, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.post('/labels', data);
     return res.data;
   }
 
   // ─── Canned Responses ────────────────────────────────────
 
-  async listCannedResponses(): Promise<unknown> {
-    const res = await this.http.get('/canned_responses');
+  async listCannedResponses(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/canned_responses');
     return res.data;
   }
 
   async createCannedResponse(data: {
     short_code: string;
     content: string;
-  }): Promise<unknown> {
-    const res = await this.http.post('/canned_responses', data);
+  }, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.post('/canned_responses', data);
     return res.data;
   }
 
   // ─── Webhooks ────────────────────────────────────────────
 
-  async listWebhooks(): Promise<unknown> {
-    const res = await this.http.get('/webhooks');
+  async listWebhooks(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/webhooks');
     return res.data;
   }
 
   async createWebhook(data: {
     url: string;
     subscriptions: string[];
-  }): Promise<unknown> {
-    const res = await this.http.post('/webhooks', data);
+  }, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.post('/webhooks', data);
     return res.data;
   }
 
-  async deleteWebhook(webhookId: number): Promise<void> {
-    await this.http.delete(`/webhooks/${webhookId}`);
+  async deleteWebhook(webhookId: number, accountId?: number): Promise<void> {
+    const http = this.forAccount(accountId);
+    await http.delete(`/webhooks/${webhookId}`);
   }
 
   // ─── Reports ─────────────────────────────────────────────
@@ -296,21 +359,24 @@ export class ChatwootClient {
     type: string;
     since?: string;
     until?: string;
-  }): Promise<unknown> {
-    const res = await this.http.get('/reports', { params });
+  }, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/reports', { params });
     return res.data;
   }
 
-  async getConversationCounts(): Promise<unknown> {
-    const res = await this.http.get('/reports/agents/conversations');
+  async getConversationCounts(accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
+    const res = await http.get('/reports/agents/conversations');
     return res.data;
   }
 
   // ─── Custom Attributes ───────────────────────────────────
 
-  async listCustomAttributes(model?: string): Promise<unknown> {
+  async listCustomAttributes(model?: string, accountId?: number): Promise<unknown> {
+    const http = this.forAccount(accountId);
     const params = model ? { attribute_model: model } : {};
-    const res = await this.http.get('/custom_attribute_definitions', { params });
+    const res = await http.get('/custom_attribute_definitions', { params });
     return res.data;
   }
 
