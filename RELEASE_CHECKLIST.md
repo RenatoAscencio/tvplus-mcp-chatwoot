@@ -37,7 +37,7 @@
 
 - [x] Dockerfile verified (multi-stage, health check)
 - [x] docker-compose.yml verified
-- [ ] `docker build -t tvplus-mcp-chatwoot:0.6.0 .` — builds successfully (manual)
+- [ ] `docker build -t mcp-chatwoot:0.6.0 .` — builds successfully (manual)
 - [ ] Container starts and responds to `/health` (manual)
 
 ## Release
@@ -45,4 +45,4 @@
 - [x] Version in package.json: `0.6.0`
 - [x] Git tag: `v0.6.0` (SHA: c26ce8a)
 - [x] Push to main (SHA: e77e21e)
-- [x] GitHub release: https://github.com/RenatoAscencio/tvplus-mcp-chatwoot/releases/tag/v0.6.0
+- [x] GitHub release: https://github.com/RenatoAscencio/mcp-chatwoot/releases/tag/v0.6.0

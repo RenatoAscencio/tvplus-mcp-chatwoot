@@ -1,5 +1,5 @@
 {
-  "name": "tvplus-mcp-chatwoot",
+  "name": "mcp-chatwoot",
   "version": "0.6.0",
   "description": "MCP Server for Chatwoot - Manage conversations, contacts, messages, and more via Model Context Protocol",
   "author": "Renato Ascencio",
@@ -7,7 +7,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "tvplus-mcp-chatwoot": "dist/index.js"
+    "mcp-chatwoot": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -54,6 +54,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/RenatoAscencio/tvplus-mcp-chatwoot.git"
+    "url": "https://github.com/RenatoAscencio/mcp-chatwoot.git"
   }
 }

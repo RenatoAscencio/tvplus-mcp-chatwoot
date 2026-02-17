@@ -1,4 +1,4 @@
-# tvplus-mcp-chatwoot — Scope (v0.6.0)
+# mcp-chatwoot — Scope (v0.6.0)
 
 ## What This Project Covers
 

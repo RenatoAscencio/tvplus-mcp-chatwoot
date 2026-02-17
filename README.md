@@ -1,4 +1,4 @@
-# tvplus-mcp-chatwoot
+# mcp-chatwoot
 
 MCP (Model Context Protocol) server for [Chatwoot](https://www.chatwoot.com/) — manage conversations, contacts, messages, agents, teams, and more through AI tools.
 
@@ -92,8 +92,8 @@ Knowledge base management for portals, articles, and categories.
 ### 1. Install
 
 ```bash
-git clone https://github.com/RenatoAscencio/tvplus-mcp-chatwoot.git
-cd tvplus-mcp-chatwoot
+git clone https://github.com/RenatoAscencio/mcp-chatwoot.git
+cd mcp-chatwoot
 npm install
 npm run build
 ```
@@ -131,7 +131,7 @@ Add to `~/.claude/mcp.json`:
   "mcpServers": {
     "chatwoot": {
       "command": "node",
-      "args": ["/path/to/tvplus-mcp-chatwoot/dist/index.js"],
+      "args": ["/path/to/mcp-chatwoot/dist/index.js"],
       "env": {
         "CHATWOOT_BASE_URL": "https://your-chatwoot.com",
         "CHATWOOT_API_TOKEN": "your_api_token"
@@ -150,7 +150,7 @@ Add to `~/.claude/mcp.json`:
   "mcpServers": {
     "chatwoot": {
       "command": "node",
-      "args": ["/path/to/tvplus-mcp-chatwoot/dist/index.js"],
+      "args": ["/path/to/mcp-chatwoot/dist/index.js"],
       "env": {
         "CHATWOOT_BASE_URL": "https://your-chatwoot.com",
         "CHATWOOT_API_TOKEN": "your_api_token",

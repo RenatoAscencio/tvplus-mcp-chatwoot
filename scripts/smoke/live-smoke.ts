@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Live Smoke Test — tvplus-mcp-chatwoot v0.6.0
+ * Live Smoke Test — mcp-chatwoot v0.6.0
  *
  * Runs 1-2 read-only calls per enabled bucket against a real Chatwoot instance.
  * Only executes when LIVE_SMOKE=true.

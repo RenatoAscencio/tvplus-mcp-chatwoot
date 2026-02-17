@@ -69,7 +69,7 @@ export function createServer(): Server {
 
   const server = new Server(
     {
-      name: 'tvplus-mcp-chatwoot',
+      name: 'mcp-chatwoot',
       version: '0.6.0',
     },
     {

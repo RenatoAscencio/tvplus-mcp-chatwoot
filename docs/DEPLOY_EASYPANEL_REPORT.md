@@ -11,7 +11,7 @@
 
 | Field | Value |
 |-------|-------|
-| Image | `ghcr.io/renatoascencio/tvplus-mcp-chatwoot:main` |
+| Image | `ghcr.io/renatoascencio/mcp-chatwoot:main` |
 | Image SHA | `sha256:c03cb3d68c0baad497ab5fc7035f794e22aa2dabaf7496ef28ee30db58e391b8` |
 | OCI Revision | `15caf53` (v0.2.0) |
 | Container | `general_chatwoot-mcp.1.3nhktltlwp1uxeon8ojg7jd7b` |
@@ -39,7 +39,7 @@
 
 ```bash
 docker service update \
-  --image ghcr.io/renatoascencio/tvplus-mcp-chatwoot:main \
+  --image ghcr.io/renatoascencio/mcp-chatwoot:main \
   --force general_chatwoot-mcp
 ```
 
@@ -65,7 +65,7 @@ docker service update \
 ```json
 {
   "status": "ok",
-  "server": "tvplus-mcp-chatwoot",
+  "server": "mcp-chatwoot",
   "version": "0.6.0",
   "activeSessions": 0,
   "tools": 81
@@ -108,7 +108,7 @@ docker service rollback general_chatwoot-mcp
 
 # Option 2: Pin to previous image SHA
 docker service update \
-  --image ghcr.io/renatoascencio/tvplus-mcp-chatwoot:main@sha256:c03cb3d68c0baad497ab5fc7035f794e22aa2dabaf7496ef28ee30db58e391b8 \
+  --image ghcr.io/renatoascencio/mcp-chatwoot:main@sha256:c03cb3d68c0baad497ab5fc7035f794e22aa2dabaf7496ef28ee30db58e391b8 \
   general_chatwoot-mcp
 ```
 

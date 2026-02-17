@@ -1,4 +1,4 @@
-# CLAUDE.md — tvplus-mcp-chatwoot
+# CLAUDE.md — mcp-chatwoot
 
 ## Project Overview
 

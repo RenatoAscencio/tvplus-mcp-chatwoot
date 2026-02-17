@@ -142,7 +142,7 @@ export async function startHttpServer(): Promise<void> {
   app.get('/health', (_req, res) => {
     res.json({
       status: 'ok',
-      server: 'tvplus-mcp-chatwoot',
+      server: 'mcp-chatwoot',
       version: '0.6.0',
       activeSessions: sessions.size,
       tools: allTools.length,
@@ -160,7 +160,7 @@ export async function startHttpServer(): Promise<void> {
       });
 
       const server = new Server(
-        { name: 'tvplus-mcp-chatwoot', version: '0.6.0' },
+        { name: 'mcp-chatwoot', version: '0.6.0' },
         { capabilities: { tools: {} } },
       );
 
