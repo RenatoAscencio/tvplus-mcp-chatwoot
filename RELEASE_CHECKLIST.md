@@ -43,6 +43,6 @@
 ## Release
 
 - [x] Version in package.json: `0.6.0`
-- [ ] Git tag: `v0.6.0`
-- [ ] Push to main
-- [ ] GitHub release with CHANGELOG excerpt
+- [x] Git tag: `v0.6.0` (SHA: c26ce8a)
+- [x] Push to main (SHA: e77e21e)
+- [x] GitHub release: https://github.com/RenatoAscencio/tvplus-mcp-chatwoot/releases/tag/v0.6.0
