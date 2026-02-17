@@ -1,6 +1,6 @@
 {
   "name": "tvplus-mcp-chatwoot",
-  "version": "0.2.0",
+  "version": "0.6.0",
   "description": "MCP Server for Chatwoot - Manage conversations, contacts, messages, and more via Model Context Protocol",
   "author": "Renato Ascencio",
   "license": "MIT",
@@ -16,6 +16,9 @@
     "dev": "tsx src/index.ts",
     "dev:http": "MCP_MODE=http tsx src/index.ts",
     "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke:live": "tsx scripts/smoke/live-smoke.ts",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build"
   },
@@ -29,8 +32,10 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.15.0",
+    "nock": "^14.0.11",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20.0.0"

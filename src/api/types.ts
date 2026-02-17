@@ -90,6 +90,40 @@ export interface ChatwootWebhook {
   subscriptions: string[];
 }
 
+export interface ChatwootCustomAttribute {
+  id: number;
+  attribute_display_name: string;
+  attribute_display_type: string;
+  attribute_description?: string;
+  attribute_key: string;
+  attribute_model: 'contact_attribute' | 'conversation_attribute';
+  attribute_values?: string[];
+  default_value?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ChatwootAutomationRule {
+  id: number;
+  name: string;
+  description?: string;
+  event_name: string;
+  conditions: Array<Record<string, unknown>>;
+  actions: Array<Record<string, unknown>>;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ChatwootCustomFilter {
+  id: number;
+  name: string;
+  filter_type: 'conversation' | 'contact' | 'report';
+  query: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface PaginatedResponse<T> {
   data: {
     meta?: {

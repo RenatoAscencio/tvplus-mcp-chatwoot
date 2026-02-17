@@ -5,12 +5,23 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import { ChatwootClient } from './api/client.js';
-import { getChatwootConfig, getServerConfig } from './utils/config.js';
+import { ChatwootPublicClient } from './api/public-client.js';
+import { ChatwootPlatformClient } from './api/platform-client.js';
+import { getChatwootConfig, getPlatformConfig, getBucketConfig, getServerConfig } from './utils/config.js';
 import { logger } from './utils/logger.js';
-import { tools } from './tools/definitions.js';
+import { tools as coreTools } from './tools/definitions.js';
 import { handleToolCall } from './tools/handlers.js';
+import { publicTools } from './tools/public/definitions.js';
+import { handlePublicToolCall } from './tools/public/handlers.js';
+import { platformTools } from './tools/platform/definitions.js';
+import { handlePlatformToolCall } from './tools/platform/handlers.js';
+import { enterpriseTools } from './tools/enterprise/definitions.js';
+import { handleEnterpriseToolCall } from './tools/enterprise/handlers.js';
+import { helpCenterTools } from './tools/helpcenter/definitions.js';
+import { handleHelpCenterToolCall } from './tools/helpcenter/handlers.js';
 
 const SESSION_TIMEOUT = 5 * 60 * 1000;
 
@@ -24,6 +35,34 @@ export async function startHttpServer(): Promise<void> {
   const serverConfig = getServerConfig();
   const chatwootConfig = getChatwootConfig();
   const client = new ChatwootClient(chatwootConfig);
+  const buckets = getBucketConfig();
+
+  // Build tool list based on enabled buckets
+  const allTools: Tool[] = [...coreTools];
+
+  let publicClient: ChatwootPublicClient | null = null;
+  if (buckets.publicApi) {
+    publicClient = new ChatwootPublicClient(chatwootConfig.baseUrl);
+    allTools.push(...publicTools);
+  }
+
+  let platformClient: ChatwootPlatformClient | null = null;
+  if (buckets.platformApi) {
+    const platformConfig = getPlatformConfig();
+    if (platformConfig) {
+      platformClient = new ChatwootPlatformClient(platformConfig);
+      allTools.push(...platformTools);
+    }
+  }
+
+  if (buckets.enterprise) allTools.push(...enterpriseTools);
+  if (buckets.helpCenter) allTools.push(...helpCenterTools);
+
+  // Name lookups for routing
+  const publicToolNames = new Set(publicTools.map((t) => t.name));
+  const platformToolNames = new Set(platformTools.map((t) => t.name));
+  const enterpriseToolNames = new Set(enterpriseTools.map((t) => t.name));
+  const helpCenterToolNames = new Set(helpCenterTools.map((t) => t.name));
 
   const sessions = new Map<string, SessionEntry>();
   const app = express();
@@ -74,13 +113,39 @@ export async function startHttpServer(): Promise<void> {
     next();
   }
 
+  /** Route tool call to the correct bucket handler */
+  async function routeToolCall(name: string, toolArgs: Record<string, unknown>) {
+    if (publicToolNames.has(name)) {
+      if (!publicClient) {
+        return { content: [{ type: 'text' as const, text: 'Public API bucket not enabled.' }], isError: true };
+      }
+      return handlePublicToolCall(publicClient, name, toolArgs);
+    }
+    if (platformToolNames.has(name)) {
+      if (!platformClient) {
+        return { content: [{ type: 'text' as const, text: 'Platform API bucket not enabled.' }], isError: true };
+      }
+      return handlePlatformToolCall(platformClient, name, toolArgs, buckets.platformSafeMode);
+    }
+    if (enterpriseToolNames.has(name)) {
+      const safeMode = process.env.MCP_SAFE_MODE === 'true';
+      return handleEnterpriseToolCall(client, name, toolArgs, safeMode);
+    }
+    if (helpCenterToolNames.has(name)) {
+      const safeMode = process.env.MCP_SAFE_MODE === 'true';
+      return handleHelpCenterToolCall(client, name, toolArgs, safeMode);
+    }
+    return handleToolCall(client, name, toolArgs);
+  }
+
   // Health check
   app.get('/health', (_req, res) => {
     res.json({
       status: 'ok',
       server: 'tvplus-mcp-chatwoot',
-      version: '0.2.0',
+      version: '0.6.0',
       activeSessions: sessions.size,
+      tools: allTools.length,
     });
   });
 
@@ -95,16 +160,16 @@ export async function startHttpServer(): Promise<void> {
       });
 
       const server = new Server(
-        { name: 'tvplus-mcp-chatwoot', version: '0.1.0' },
+        { name: 'tvplus-mcp-chatwoot', version: '0.6.0' },
         { capabilities: { tools: {} } },
       );
 
-      server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));
+      server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: allTools }));
 
       server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { name, arguments: args } = request.params;
         logger.info(`[${sessionId.slice(0, 8)}] Tool call: ${name}`);
-        return handleToolCall(client, name, (args || {}) as Record<string, unknown>);
+        return routeToolCall(name, (args || {}) as Record<string, unknown>);
       });
 
       await server.connect(transport);
@@ -173,5 +238,6 @@ export async function startHttpServer(): Promise<void> {
     logger.info(`HTTP server listening on port ${serverConfig.port}`);
     logger.info(`Health: http://localhost:${serverConfig.port}/health`);
     logger.info(`MCP:    http://localhost:${serverConfig.port}/mcp`);
+    logger.info(`Tools:  ${allTools.length} total`);
   });
 }
