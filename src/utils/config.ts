@@ -4,7 +4,7 @@ dotenv.config();
 
 export interface ChatwootConfig {
   baseUrl: string;
-  accountId: number;
+  accountId?: number;
   apiToken: string;
 }
 
@@ -38,9 +38,10 @@ function requireEnv(key: string, fallback?: string): string {
 }
 
 export function getChatwootConfig(): ChatwootConfig {
+  const rawAccountId = process.env.CHATWOOT_ACCOUNT_ID;
   return {
     baseUrl: requireEnv('CHATWOOT_BASE_URL').replace(/\/+$/, ''),
-    accountId: parseInt(requireEnv('CHATWOOT_ACCOUNT_ID'), 10),
+    accountId: rawAccountId ? parseInt(rawAccountId, 10) : undefined,
     apiToken: requireEnv('CHATWOOT_API_TOKEN'),
   };
 }

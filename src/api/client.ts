@@ -3,9 +3,9 @@ import { ChatwootConfig } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 
 export class ChatwootClient {
-  private http: AxiosInstance;
+  private http: AxiosInstance | null;
   private baseUrl: string;
-  private defaultAccountId: number;
+  private defaultAccountId: number | undefined;
   private apiToken: string;
 
   constructor(config: ChatwootConfig) {
@@ -13,16 +13,47 @@ export class ChatwootClient {
     this.defaultAccountId = config.accountId;
     this.apiToken = config.apiToken;
 
-    this.http = axios.create({
-      baseURL: `${config.baseUrl}/api/v1/accounts/${config.accountId}`,
+    if (config.accountId) {
+      this.http = axios.create({
+        baseURL: `${config.baseUrl}/api/v1/accounts/${config.accountId}`,
+        headers: {
+          'api_access_token': config.apiToken,
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+      });
+
+      this.http.interceptors.response.use(
+        (response) => response,
+        (error: AxiosError) => {
+          const status = error.response?.status;
+          const data = error.response?.data as Record<string, unknown> | undefined;
+          const message = (data?.message as string) || (data?.error as string) || error.message;
+
+          logger.error(`Chatwoot API error: ${status} ${message}`, {
+            url: error.config?.url,
+            method: error.config?.method,
+          });
+
+          throw new ChatwootApiError(status || 500, message, data);
+        },
+      );
+    } else {
+      this.http = null;
+    }
+  }
+
+  private createAccountInstance(accountId: number): AxiosInstance {
+    const instance = axios.create({
+      baseURL: `${this.baseUrl}/api/v1/accounts/${accountId}`,
       headers: {
-        'api_access_token': config.apiToken,
+        'api_access_token': this.apiToken,
         'Content-Type': 'application/json',
       },
       timeout: 30000,
     });
 
-    this.http.interceptors.response.use(
+    instance.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
         const status = error.response?.status;
@@ -37,27 +68,30 @@ export class ChatwootClient {
         throw new ChatwootApiError(status || 500, message, data);
       },
     );
+
+    return instance;
   }
 
   /** Returns the axios instance scoped to a specific account (or default) */
   private forAccount(accountId?: number): AxiosInstance {
-    if (!accountId || accountId === this.defaultAccountId) {
+    if (accountId) {
+      if (accountId === this.defaultAccountId && this.http) {
+        return this.http;
+      }
+      return this.createAccountInstance(accountId);
+    }
+    if (this.http) {
       return this.http;
     }
-    // Create a one-off instance for the alternate account
-    return axios.create({
-      baseURL: `${this.baseUrl}/api/v1/accounts/${accountId}`,
-      headers: {
-        'api_access_token': this.apiToken,
-        'Content-Type': 'application/json',
-      },
-      timeout: 30000,
-    });
+    throw new Error('account_id is required when CHATWOOT_ACCOUNT_ID is not set');
   }
 
   /** Returns an axios instance scoped to API v2 for a specific account */
   private forAccountV2(accountId?: number): AxiosInstance {
     const id = accountId || this.defaultAccountId;
+    if (!id) {
+      throw new Error('account_id is required when CHATWOOT_ACCOUNT_ID is not set');
+    }
     return axios.create({
       baseURL: `${this.baseUrl}/api/v2/accounts/${id}`,
       headers: {
@@ -68,13 +102,13 @@ export class ChatwootClient {
     });
   }
 
-  get currentAccountId(): number {
+  get currentAccountId(): number | undefined {
     return this.defaultAccountId;
   }
 
   // ─── Health ──────────────────────────────────────────────
 
-  async health(accountId?: number): Promise<{ success: boolean; accountName?: string; accountId: number }> {
+  async health(accountId?: number): Promise<{ success: boolean; accountName?: string; accountId?: number }> {
     const http = this.forAccount(accountId);
     const id = accountId || this.defaultAccountId;
     const res = await http.get('/');
