@@ -135,7 +135,7 @@ Knowledge base management.
 
 ### ID Parameters
 - All entity IDs use `*_id` suffix: `contact_id`, `conversation_id`, `team_id`, `inbox_id`, etc.
-- `account_id` is always optional on Application API tools (defaults to `CHATWOOT_ACCOUNT_ID`)
+- `account_id` is optional when `CHATWOOT_ACCOUNT_ID` is set; required on every call when it is not
 
 ### HTTP Methods
 - `list_*` / `get_*` / `search_*` → GET

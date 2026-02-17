@@ -49,8 +49,10 @@ Every new MCP tool requires changes in exactly 3 files:
 
 ## Multi-Account
 
-All tools accept optional `account_id`. When omitted, uses `CHATWOOT_ACCOUNT_ID` env var.
-The `ChatwootClient.forAccount(accountId)` method creates a scoped axios instance for alternate accounts.
+All tools accept optional `account_id` parameter.
+- If `CHATWOOT_ACCOUNT_ID` is set, it is used as default when `account_id` is omitted.
+- If `CHATWOOT_ACCOUNT_ID` is **not** set, `account_id` is **required** on every tool call.
+The `ChatwootClient.forAccount(accountId)` method creates a scoped axios instance per account.
 
 ## Key Conventions
 
@@ -77,7 +79,7 @@ npm test             # Run tests (vitest)
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | CHATWOOT_BASE_URL | Yes | — | Chatwoot instance URL |
-| CHATWOOT_ACCOUNT_ID | Yes | — | Default account ID |
+| CHATWOOT_ACCOUNT_ID | No | — | Default account ID (if omitted, `account_id` required per call) |
 | CHATWOOT_API_TOKEN | Yes | — | API access token |
 | MCP_MODE | No | stdio | Transport: `stdio` or `http` |
 | PORT | No | 3000 | HTTP server port |

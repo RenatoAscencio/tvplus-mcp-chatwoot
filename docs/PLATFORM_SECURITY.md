@@ -91,7 +91,6 @@ MCP_PLATFORM_SAFE_MODE=false
       "args": ["/path/to/dist/index.js"],
       "env": {
         "CHATWOOT_BASE_URL": "https://your-chatwoot.com",
-        "CHATWOOT_ACCOUNT_ID": "1",
         "CHATWOOT_API_TOKEN": "app-token",
         "MCP_ENABLE_PLATFORM_API": "true",
         "CHATWOOT_PLATFORM_API_TOKEN": "platform-token"
@@ -109,7 +108,6 @@ MCP_PLATFORM_SAFE_MODE=false
 MCP_MODE=http \
 AUTH_TOKEN=strong-random-bearer-token \
 CHATWOOT_BASE_URL=https://your-chatwoot.com \
-CHATWOOT_ACCOUNT_ID=1 \
 CHATWOOT_API_TOKEN=app-token \
 MCP_ENABLE_PLATFORM_API=true \
 CHATWOOT_PLATFORM_API_TOKEN=platform-token \

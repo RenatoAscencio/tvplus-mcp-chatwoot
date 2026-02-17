@@ -104,7 +104,7 @@ npm run build
 cp .env.example .env
 # Edit .env with your Chatwoot credentials:
 #   CHATWOOT_BASE_URL=https://your-chatwoot.com
-#   CHATWOOT_ACCOUNT_ID=1
+#   CHATWOOT_ACCOUNT_ID=1    (optional — omit to require account_id per tool call)
 #   CHATWOOT_API_TOKEN=your_token
 ```
 
@@ -134,13 +134,14 @@ Add to `~/.claude/mcp.json`:
       "args": ["/path/to/tvplus-mcp-chatwoot/dist/index.js"],
       "env": {
         "CHATWOOT_BASE_URL": "https://your-chatwoot.com",
-        "CHATWOOT_ACCOUNT_ID": "1",
         "CHATWOOT_API_TOKEN": "your_api_token"
       }
     }
   }
 }
 ```
+
+> **Note**: `CHATWOOT_ACCOUNT_ID` is optional. When omitted, each tool call requires `account_id` as a parameter, enabling multi-account usage from a single instance.
 
 ### Enabling Optional Buckets
 
@@ -152,7 +153,6 @@ Add to `~/.claude/mcp.json`:
       "args": ["/path/to/tvplus-mcp-chatwoot/dist/index.js"],
       "env": {
         "CHATWOOT_BASE_URL": "https://your-chatwoot.com",
-        "CHATWOOT_ACCOUNT_ID": "1",
         "CHATWOOT_API_TOKEN": "your_api_token",
         "MCP_ENABLE_PUBLIC_API": "true",
         "MCP_ENABLE_ENTERPRISE": "true",
@@ -171,7 +171,7 @@ Add to `~/.claude/mcp.json`:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `CHATWOOT_BASE_URL` | Yes | — | Chatwoot instance URL |
-| `CHATWOOT_ACCOUNT_ID` | Yes | — | Default Chatwoot account ID |
+| `CHATWOOT_ACCOUNT_ID` | No | — | Default account ID (if omitted, `account_id` required per tool call) |
 | `CHATWOOT_API_TOKEN` | Yes | — | Application API access token |
 | `MCP_MODE` | No | `stdio` | Transport mode: `stdio` or `http` |
 | `PORT` | No | `3000` | HTTP server port |
@@ -240,7 +240,7 @@ npm run build
 
 ## Multi-Account Support
 
-All Application API tools accept an optional `account_id` parameter. When omitted, uses the default `CHATWOOT_ACCOUNT_ID` from the environment.
+All Application API tools accept an `account_id` parameter. When `CHATWOOT_ACCOUNT_ID` is set, it serves as the default and `account_id` becomes optional. When not set, `account_id` is required on every tool call — this enables a single MCP instance to serve multiple Chatwoot accounts.
 
 ## API Coverage
 

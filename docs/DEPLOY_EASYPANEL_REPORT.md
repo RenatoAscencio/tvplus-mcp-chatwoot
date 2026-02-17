@@ -30,7 +30,6 @@
 | `LOG_LEVEL` | `info` |
 | `AUTH_TOKEN` | `***` (set) |
 | `CHATWOOT_BASE_URL` | `https://chat.convo.chat` |
-| `CHATWOOT_ACCOUNT_ID` | `4` |
 | `CHATWOOT_API_TOKEN` | `***` (set) |
 | `NODE_ENV` | `production` |
 
